@@ -1,3 +1,6 @@
+<?php 
+session_start();
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -12,57 +15,11 @@
     <link rel="stylesheet" href="./src/style/style.css">
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-light fixed-top">
-    <div class="container">
-        <a class="navbar-brand fadeInDown" href="index.html">
-            <i class="fas fa-leaf me-2"></i>Smart<span>Farm</span>
-        </a>
-        
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav me-auto">
-                <li class="nav-item fadeInDown" style="animation-delay: 0.2s;">
-                    <a class="nav-link" href="index.html"><i class="fas fa-home me-1"></i>Beranda</a>
-                </li>
-                <li class="nav-item fadeInDown" style="animation-delay: 0.3s;">
-                    <a class="nav-link" href="#features"><i class="fas fa-lightbulb me-1"></i>Fitur</a>
-                </li>
-                <li class="nav-item fadeInDown" style="animation-delay: 0.4s;">
-                    <a class="nav-link" href="./pages/produk.html"><i class="fas fa-box-open me-1"></i>Produk</a>
-                </li>
-                <li class="nav-item fadeInDown" style="animation-delay: 0.5s;">
-                    <a class="nav-link" href="./admin/manajemen-produk.html"><i class="fas fa-cogs me-1"></i>Manajemen Produk</a>
-                </li>
-                <li class="nav-item fadeInDown" style="animation-delay: 0.6s;">
-                    <a class="nav-link" href="#contact"><i class="fas fa-envelope me-1"></i>Kontak</a>
-                </li>
-            </ul>
-            
-            <form class="d-flex search-form fadeInDown" style="animation-delay: 0.7s;">
-                <input class="form-control me-2" type="search" placeholder="Cari produk..." aria-label="Search">
-                <button class="btn search-btn" type="submit">
-                    <i class="fas fa-search"></i>
-                </button>
-            </form>
-            
-            <div class="fadeInDown" style="animation-delay: 0.8s;">
-                <a href="#" class="cart-icon me-4"> <i class="fas fa-shopping-cart"></i>
-                    <span class="cart-count">0</span>
-                </a>
-            </div>
-
-<div class="d-flex align-items-center fadeInDown" style="animation-delay: 0.9s;">
-    <a href="login.php" class="btn btn-outline-success btn-sm me-1"><i class="fas fa-sign-in-alt me-1"></i> Login</a>
-    <a href="register.php" class="btn btn-success btn-sm"><i class="fas fa-user-plus me-1"></i> Register</a>
-</div>
-        </div>
-    </div>
-</nav>
-
-    
+    <!-- NAVBAR -->
+<?php 
+include './components/navbar.php'
+?>
+    <!-- HERO -->
 <section class="hero-section">
         <video autoplay loop muted playsinline poster="https://cdn.creazilla.com/videos/7942048/harvester-tractor-in-field-harvests-tractor-video-lg.mp4">
             <source src="https://cdn.pixabay.com/video/2023/10/13/184808-874264370_large.mp4" type="video/mp4">
@@ -148,39 +105,10 @@
             <a href="./admin/manajemen-produk.html" class="btn btn-hero btn-lg"><i class="fas fa-hand-point-right me-2"></i> Mulai Sekarang</a>
         </div>
     </section>
-
-<footer class="footer-custom">
-    <div class="container">
-        <div class="row">
-            <div class="col-md-4">
-                <h4>Tentang Kami</h4>
-                <p>Kami adalah penyedia solusi pertanian cerdas yang berkomitmen untuk meningkatkan produktivitas dan keberlanjutan pertanian.</p>
-            </div>
-            <div class="col-md-4">
-                <h4>Link Penting</h4>
-                <ul class="list-unstyled">
-                    <li><a href="#">Beranda</a></li>
-                    <li><a href="#">Produk</a></li>
-                    <li><a href="#">Layanan</a></li>
-                    <li><a href="#">Kontak</a></li>
-                </ul>
-            </div>
-            <div class="col-md-4">
-                <h4>Ikuti Kami</h4>
-                <div class="social-icons">
-                    <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
-                    <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
-                    <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
-                    <a href="#" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
-                </div>
-            </div>
-        </div>
-        <div class="text-center mt-4">
-            <p>&copy; 2023 Smart Farm. All rights reserved.</p>
-        </div>
-    </div>
-</footer>
-
+<!-- FOOOTER -->
+ <?php 
+ include './components/footer.php'
+ ?> 
 <!-- BOOTSTRAP SCRIPT -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
