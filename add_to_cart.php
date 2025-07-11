@@ -1,70 +1,56 @@
 <?php
-session_start(); // Mulai sesi untuk menyimpan data keranjang
+// Lokasi: ELITE-FARM/add_to_cart.php
+session_start();
+require_once 'connection.php'; // Sesuaikan path ini jika connection.php tidak langsung di root
 
-// Sertakan file koneksi database jika diperlukan (misalnya untuk validasi produk_id)
-// require_once 'connection.php'; 
+header('Content-Type: application/json');
 
-header('Content-Type: application/json'); // Beri tahu browser bahwa responsnya adalah JSON
+$response = [
+    'success' => false,
+    'message' => 'Invalid request.',
+    'cart_count' => 0
+];
 
-$response = ['success' => false, 'cart_count' => 0];
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // --- SKENARIO 1: Menambahkan produk ke keranjang ---
+    if (isset($_POST['product_id']) && isset($_POST['quantity'])) {
+        $product_id = (int)$_POST['product_id'];
+        $quantity = (int)$_POST['quantity']; // Kuantitas yang ingin ditambahkan (biasanya 1 dari produk.php)
 
-// --- Hitung total item di keranjang terlebih dahulu ---
-// Logika ini dibutuhkan untuk semua jenis respons (baik add_to_cart atau get_cart_count)
-$total_items_in_cart = 0;
-if (isset($_SESSION['cart'])) {
-    foreach ($_SESSION['cart'] as $qty) {
-        $total_items_in_cart += $qty;
-    }
-}
-$response['cart_count'] = $total_items_in_cart;
-
-// --- Logika untuk hanya mendapatkan jumlah keranjang (saat halaman dimuat) ---
-// Jika parameter 'get_cart_count' ada, kita hanya perlu mengembalikan jumlah keranjang
-if (isset($_POST['get_cart_count']) && $_POST['get_cart_count'] === 'true') {
-    $response['success'] = true; // Beri tanda sukses karena ini hanya permintaan untuk mendapatkan data
-    echo json_encode($response);
-    exit(); // Hentikan eksekusi skrip di sini
-}
-
-// --- Logika untuk menambahkan produk ke keranjang (jika ada product_id) ---
-// Bagian ini hanya akan dieksekusi jika bukan hanya permintaan 'get_cart_count'
-if (isset($_POST['product_id'])) {
-    $product_id = intval($_POST['product_id']);
-    $quantity = isset($_POST['quantity']) ? intval($_POST['quantity']) : 1; // Default quantity 1
-
-    if ($product_id > 0) { // Pastikan product_id valid
-        // Inisialisasi keranjang jika belum ada di session
-        if (!isset($_SESSION['cart'])) {
-            $_SESSION['cart'] = [];
-        }
-
-        // Tambahkan produk ke keranjang atau perbarui jumlahnya
-        if (isset($_SESSION['cart'][$product_id])) {
-            $_SESSION['cart'][$product_id] += $quantity;
+        if ($product_id > 0 && $quantity > 0) {
+            if (!isset($_SESSION['cart'])) {
+                $_SESSION['cart'] = [];
+            }
+            
+            // Jika produk sudah ada di keranjang, tambahkan kuantitasnya. Jika belum, set kuantitas.
+            $_SESSION['cart'][$product_id] = isset($_SESSION['cart'][$product_id]) ? $_SESSION['cart'][$product_id] + $quantity : $quantity;
+            
+            $response['success'] = true;
+            $response['message'] = 'Produk berhasil ditambahkan ke keranjang!';
         } else {
-            $_SESSION['cart'][$product_id] = $quantity;
+            $response['message'] = 'ID produk atau kuantitas tidak valid untuk ditambahkan.';
         }
-
-        $response['success'] = true; // Beri tanda sukses karena produk berhasil ditambahkan
-        
-        // --- Hitung ulang total item di keranjang setelah penambahan ---
-        // Penting: Hitung ulang setelah $_SESSION['cart'] diperbarui
-        $total_items_in_cart = 0;
-        foreach ($_SESSION['cart'] as $qty) {
-            $total_items_in_cart += $qty;
-        }
-        $response['cart_count'] = $total_items_in_cart;
-
+    } 
+    // --- SKENARIO 2: Hanya meminta jumlah keranjang (untuk inisialisasi navbar) ---
+    elseif (isset($_POST['get_cart_count'])) {
+        $response['success'] = true; // Anggap sukses jika hanya meminta hitungan
+        $response['message'] = 'Cart count retrieved.';
     } else {
-        // Product ID tidak valid
-        $response['message'] = "ID produk tidak valid.";
+        $response['message'] = 'Parameter tidak lengkap atau tidak dikenal.';
     }
+
+    // --- SELALU HITUNG ULANG TOTAL ITEM DI KERANJANG UNTUK RESPON ---
+    $cart_count = 0;
+    if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
+        foreach ($_SESSION['cart'] as $qty) {
+            $cart_count += $qty;
+        }
+    }
+    $response['cart_count'] = $cart_count; // Kirim jumlah total item kembali
 } else {
-    // Jika tidak ada product_id yang dikirim dan bukan get_cart_count
-    $response['message'] = "Tidak ada ID produk yang diberikan.";
+    $response['message'] = 'Metode request tidak diizinkan.';
 }
 
-
-echo json_encode($response); // Kirim respons JSON
+echo json_encode($response);
 exit();
 ?>

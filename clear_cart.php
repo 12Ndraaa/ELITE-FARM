@@ -1,20 +1,28 @@
 <?php
-session_start(); // Mulai sesi
+// Lokasi: ELITE-FARM/clear_cart.php
+session_start();
+// Tidak perlu require_once 'connection.php' karena tidak berinteraksi dengan DB
 
-header('Content-Type: application/json'); // Beri tahu browser bahwa responsnya adalah JSON
+header('Content-Type: application/json');
 
-$response = ['success' => false, 'cart_count' => 0];
+$response = ['success' => false, 'message' => 'Gagal mengosongkan keranjang.', 'cart_count' => 0];
 
-// Kosongkan keranjang di sesi
-if (isset($_SESSION['cart'])) {
-    unset($_SESSION['cart']); // Menghapus seluruh variabel sesi 'cart'
-    // Atau bisa juga: $_SESSION['cart'] = []; // Mengatur keranjang menjadi array kosong
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (isset($_SESSION['cart'])) {
+        unset($_SESSION['cart']); // Menghapus seluruh array keranjang dari session
+        $response['success'] = true;
+        $response['message'] = 'Keranjang berhasil dikosongkan.';
+        $response['cart_count'] = 0; // Pastikan hitungan menjadi 0
+    } else {
+        // Keranjang sudah kosong, anggap saja berhasil
+        $response['success'] = true; 
+        $response['message'] = 'Keranjang sudah kosong.';
+        $response['cart_count'] = 0;
+    }
+} else {
+    $response['message'] = 'Metode request tidak diizinkan.';
 }
 
-// Setelah dikosongkan, jumlah item di keranjang pasti 0
-$response['success'] = true;
-$response['cart_count'] = 0; // Karena sudah dikosongkan
-
-echo json_encode($response); // Kirim respons JSON
+echo json_encode($response);
 exit();
 ?>

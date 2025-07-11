@@ -47,6 +47,20 @@ if (isset($_POST['add_product'])) {
 
         $check = getimagesize($_FILES["image"]["tmp_name"]);
         if($check !== false) {
+            // Check if file already exists (optional, but good for preventing overwrites)
+            if (file_exists($target_file)) {
+                $error_message = "Maaf, file gambar dengan nama yang sama sudah ada. Ganti nama file atau hapus yang lama.";
+            }
+            // Check file size (optional, for larger files)
+            if ($_FILES["image"]["size"] > 500000) { // 500KB
+                $error_message = "Maaf, ukuran file gambar terlalu besar. Maksimal 500KB.";
+            }
+            // Allow certain file formats
+            if($imageFileType != "jpg" && $imageFileType != "png" && $imageFileType != "jpeg"
+            && $imageFileType != "gif" ) {
+                $error_message = "Maaf, hanya file JPG, JPEG, PNG & GIF yang diizinkan.";
+            }
+
             if (empty($error_message) && move_uploaded_file($_FILES["image"]["tmp_name"], $target_file)) {
                 // File berhasil diupload
             } else if (empty($error_message)) {
@@ -66,7 +80,7 @@ if (isset($_POST['add_product'])) {
         if ($stmt->execute()) {
             $success_message = "Produk berhasil ditambahkan!";
         } else {
-            if ($stmt->errno == 1062) {
+            if ($stmt->errno == 1062) { // MySQL error code for duplicate entry
                 $error_message = "Kode produk '$kode' sudah ada. Harap gunakan kode lain.";
             } else {
                 $error_message = "Gagal menambahkan produk: " . $stmt->error;
@@ -119,8 +133,28 @@ if (isset($_POST['update_product'])) {
 
         $check = getimagesize($_FILES["image"]["tmp_name"]);
         if($check !== false) {
+            // Optional: Check if file already exists with new name
+            // if (file_exists($target_file) && $image_new !== $current_image) {
+            //     $error_message = "Maaf, file gambar dengan nama baru yang sama sudah ada. Ganti nama file atau hapus yang lama.";
+            // }
+            // Optional: Check file size
+            // if ($_FILES["image"]["size"] > 500000) { // 500KB
+            //     $error_message = "Maaf, ukuran file gambar terlalu besar. Maksimal 500KB.";
+            // }
+            // Optional: Allow certain file formats
+            // if($imageFileType != "jpg" && $imageFileType != "png" && $imageFileType != "jpeg" && $imageFileType != "gif" ) {
+            //     $error_message = "Maaf, hanya file JPG, JPEG, PNG & GIF yang diizinkan.";
+            // }
+
             if (empty($error_message) && move_uploaded_file($_FILES["image"]["tmp_name"], $target_file)) {
                 $image_update = $image_new;
+                // Optional: Delete old image if a new one is uploaded and different
+                if (!empty($current_image) && $current_image !== $image_new) {
+                    $old_image_path = $target_dir . $current_image;
+                    if (file_exists($old_image_path)) {
+                        // unlink($old_image_path); // Uncomment untuk menghapus file gambar fisik lama
+                    }
+                }
             } else if (empty($error_message)) {
                 $error_message = "Maaf, terjadi kesalahan saat mengupload file gambar baru. (Error M_U_F)";
             }
@@ -137,7 +171,7 @@ if (isset($_POST['update_product'])) {
             $success_message = "Produk berhasil diperbarui!";
             $edit_product = null; // Sembunyikan form edit setelah update
         } else {
-             if ($stmt->errno == 1062) {
+            if ($stmt->errno == 1062) { // MySQL error code for duplicate entry
                 $error_message = "Kode produk '$kode' sudah ada. Harap gunakan kode lain.";
             } else {
                 $error_message = "Gagal memperbarui produk: " . $stmt->error;
@@ -204,23 +238,12 @@ $con->close();
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script> 
     <link rel="stylesheet" href="../src/style/style.css">
     <style>
+        /* Gaya spesifik untuk halaman manajemen-produk.php */
+        /* Anda bisa menambahkan atau membiarkan gaya lain yang relevan di sini. */
+        
         /* Gaya dasar untuk body dan font */
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #f8f9fa; /* Warna latar belakang cerah */
-        }
-        /* Penyesuaian margin top untuk konten agar tidak tertutup navbar fixed-top */
-        .container-main {
-            margin-top: 100px; /* Memberikan ruang lebih dari navbar */
-            padding-bottom: 50px; /* Ruang di bagian bawah */
-        }
-        /* Styling untuk judul halaman */
-        h2 {
-            color: #343a40; /* Warna teks gelap */
-            margin-bottom: 30px; /* Jarak bawah yang cukup */
-            text-align: center; /* Posisikan di tengah */
-            font-weight: 600;
-        }
+        /* Body, container-main, dan h2 sudah dipindahkan ke style.css */
+
         /* Gaya untuk tombol utama (Tambah Produk) */
         .btn-success-custom {
             background-color: #28a745; /* Warna hijau Bootstrap success */
@@ -282,20 +305,6 @@ $con->close();
             background-color: #c82333;
             border-color: #bd2130;
         }
-
-        /* CSS untuk Navbar dan Efek Scroll */
-        .navbar {
-            transition: background-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
-            background-color: transparent; /* Awalnya transparan */
-            box-shadow: none;
-            position: fixed; /* Penting agar bisa scroll */
-            width: 100%;
-            z-index: 1030; /* Di atas sidebar */
-        }
-        .navbar.scrolled {
-            background-color: #ffffff !important; /* Warna putih saat di-scroll */
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Tambah shadow */
-        }
         .table img {
             max-width: 80px;
             height: auto;
@@ -307,8 +316,8 @@ $con->close();
     <?php include '../components/navbar.php'; // Include navbar ?>
 
     <div class="container container-main">
-        <h2 class="mb-4">Manajemen Produk</h2>
-        <p class="text-center text-muted mb-4">Halaman ini adalah dashboard untuk mengelola daftar produk Anda. Hanya dapat diakses oleh Admin.</p>
+        <h2 class="mb-4 text-center">Manajemen Produk</h2>
+        <p class="text-center text-muted mb-4">Halaman ini adalah DASHBOARD untuk mengelola daftar produk Anda, KHUSUS ADMIN</p>
 
         <?php if (isset($success_message) && $success_message != ""): ?>
             <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -430,9 +439,11 @@ $con->close();
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../src/js/script.js"></script>
+    <script src="../src/js/script.js"></script> 
     <script>
         // Animasi Navbar saat scroll
+        // Pastikan fungsi ini atau event listener-nya tidak diduplikasi jika sudah ada di script.js
+        // Jika Anda sudah menanganinya di script.js, Anda bisa menghapus bagian ini.
         $(window).scroll(function() {
             if ($(this).scrollTop() > 50) {
                 $('.navbar').addClass('scrolled');
